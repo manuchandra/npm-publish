@@ -44,7 +44,7 @@ jobs:
          run: npm install grunt --loglevel verbose
        - name: "Append to .npmrc file to allow publish of version-bumped @viaplay scoped package to manu-npm-virtual"
          run: |
-          HTTP_RESPONSE_CODE=$(curl -s -u ${{steps.setup-jfrog.outputs.oidc-user}}:${{steps.setup-jfrog.outputs.oidc-token}} -o auth_response -w "%{http_code}" "https://hts2.jfrog.io/manu-npm-virtual/auth/viaplay")
+          HTTP_RESPONSE_CODE=$(curl -s -u ${{steps.setup-jfrog.outputs.oidc-user}}:${{steps.setup-jfrog.outputs.oidc-token}} -o auth_response -w "%{http_code}" "https://hts2.jfrog.io/access/api/v1/oidc/token")
           if [ $HTTP_RESPONSE_CODE == "200" ]; then
             cat "auth_response" >> .npmrc
             rm "auth_response"  
