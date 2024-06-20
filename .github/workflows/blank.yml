@@ -69,3 +69,13 @@ jobs:
             echo "::error Artifactory authentication failed"
             exit 1
            fi  
+       - name: "Test npm publish of scoped package"
+         run: |
+          #Create a new version of @viaplay/cicd-npm-publish-tester, copy forward, bump version and publish it!
+          mkdir -p app
+          cp node_modules/@viaplay/cicd-npm-publish-tester/package.json app/package.json
+          cp node_modules/@viaplay/cicd-npm-publish-tester/index.js app/index.js
+          cd app
+          npm version patch
+          npm publish
+          cd ..   
