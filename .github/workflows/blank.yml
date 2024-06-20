@@ -1,0 +1,55 @@
+name: "JFrog-GitHub NPM Publish OIDC Integration"
+on: 
+  push:
+    branches:
+      - '*'
+
+# This is required as per
+# https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-cloud-providers#adding-permissions-settings
+permissions:
+  id-token: write
+jobs:
+   npm-publish-setup:
+    runs-on: ubuntu-latest  
+    steps:
+     - name: "Setup"
+       uses: jfrog/setup-jfrog-cli@v4
+       id: setup-jfrog
+       env:
+        JF_URL: https://hts2.jfrog.io
+       with:
+        oidc-provider-name: manu-grpapi
+      #  oidc-audience: test # Does not seem to be needed?!
+      #From this step we get outputs "oidc-user" and "oidc-token"
+     - name: "Create .npmrc file for NPM INSTALL, scoped packages @viaplay, @mtg in local npm registry mtg-npm-local"
+       run: |
+        jf rt curl /api/npm/auth > auth
+        echo "@viaplay:registry=https://hts2.jfrog.io/artifactory/api/npm/manu-npm-virtual/" > .npmrc
+        echo "@mtg:registry=https://hts2.jfrog.io/artifactory/api/npm/manu-npm-virtual/" >> .npmrc
+        echo "//hts2.jfrog.io/artifactory/api/npm/manu-npm-virtual/:always-auth=true" >> .npmrc
+        cat auth | sed "s/^_auth\(.*\)$/\/\/hts2.jfrog.io\/:_auth\1/"  | sed 's/ //g' >> .npmrc
+        rm auth
+     - name: "Test npm install of scoped package"
+       run: npm install @viaplay/cicd-npm-publish-tester
+     - name: "Append to .npmrc file to allow publish of version-bumped @viaplay scoped package to manu-npm-virtual"
+       run: |
+          HTTP_RESPONSE_CODE=$(curl -s -u ${{steps.setup-jfrog.outputs.oidc-user}}:${{steps.setup-jfrog.outputs.oidc-token}} -o auth_response -w "%{http_code}" "https://hts2.jfrog.io/manu-npm-virtual/auth/viaplay")
+          if [ $HTTP_RESPONSE_CODE == "200" ]; then
+            cat "auth_response" >> .npmrc
+            rm "auth_response"
+            else
+            echo "HTTP ERROR: ${HTTP_RESPONSE_CODE}" 
+            echo "::error Artifactory authentication failed"
+            exit 1
+            fi      
+           
+     - name: "Test npm publish of scoped package"
+       run: |
+        #Create a new version of @viaplay/cicd-npm-publish-tester, copy forward, bump version and publish it!
+          mkdir -p app
+          cp node_modules/@viaplay/cicd-npm-publish-tester/package.json app/package.json
+          cp node_modules/@viaplay/cicd-npm-publish-tester/index.js app/index.js
+          cd app
+          npm version patch
+          npm publish
+          cd ..
