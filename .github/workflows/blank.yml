@@ -31,9 +31,6 @@ jobs:
           echo "loglevel=http" > .npmrc
           echo "fund=false" >> .npmrc
           echo "@mtg:registry=https://hts2.jfrog.io/artifactory/api/npm/manu-npm-virtual/" >> .npmrc
-          echo "//hts2.jfrog.io/artifactory/api/npm/manu-npm-virtual/:_password=QVBCN0xkNmNyaXhVY1NqN0prTVg0cEtoeURF" >> .npmrc
-          echo "//hts2.jfrog.io/artifactory/api/npm/manu-npm-virtual/:username=manu" >> .npmrc
-          echo "//hts2.jfrog.io/artifactory/api/npm/manu-npm-virtual/:email=manuchandran@test.com" >> .npmrc
           echo "//hts2.jfrog.io/artifactory/api/npm/manu-npm-virtual/:always-auth=true" >> .npmrc
           cat auth | sed "s/^_auth\(.*\)$/\/\/hts2.jfrog.io\/:_auth\1/"  | sed 's/ //g' >> .npmrc    
        - name: npm install
