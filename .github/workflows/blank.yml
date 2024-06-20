@@ -42,3 +42,14 @@ jobs:
           cat auth | sed "s/^_auth\(.*\)$/\/\/hts2.jfrog.io\/:_auth\1/"  | sed 's/ //g' >> .npmrc    
        - name: npm install
          run: npm install grunt --loglevel verbose
+       - name: "Append to .npmrc file to allow publish of version-bumped @viaplay scoped package to manu-npm-virtual"
+         run: |
+          HTTP_RESPONSE_CODE=$(curl -s -u ${{steps.setup-jfrog.outputs.oidc-user}}:${{steps.setup-jfrog.outputs.oidc-token}} -o auth_response -w "%{http_code}" "https://hts2.jfrog.io/manu-npm-virtual/auth/viaplay")
+          if [ $HTTP_RESPONSE_CODE == "200" ]; then
+            cat "auth_response" >> .npmrc
+            rm "auth_response"  
+          else
+            echo "HTTP ERROR: ${HTTP_RESPONSE_CODE}" 
+            echo "::error Artifactory authentication failed"
+            exit 1
+           fi  
