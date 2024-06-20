@@ -7,7 +7,7 @@ permissions:
   id-token: write
 
 jobs:
-  build:
+  npm-publish-setup:
      runs-on: ubuntu-latest
      env:
       OIDC_AUDIENCE: 'grpapi'
@@ -22,11 +22,7 @@ jobs:
            oidc-provider-name: ${{ env.OIDC_PROVIDER }}
            oidc-audience: ${{ env.OIDC_AUDIENCE }}
        - name: Print env
-         run: printenv
-
-       - name: Ping Artifactory
-         run: jf rt ping       
-           
+         run: printenv           
        - name: Get npm auth token
          run: jf rt curl /artifactory/api/npm/auth > auth
            
