@@ -10,7 +10,7 @@ jobs:
   npm-publish-setup:
      runs-on: ubuntu-latest
      env:
-      OIDC_AUDIENCE: 'grpapi'
+      OIDC_AUDIENCE: 'grpap'
       OIDC_PROVIDER: 'manu-grpapi'
       PLATFORM_REPO: 'manu-npm-virtual'
      steps:
